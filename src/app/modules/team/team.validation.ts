@@ -16,9 +16,3 @@ export const createTeamZodSchema = z.object({
         .max(50, { message: "Name cannot exceed 50 characters." }),
     members: z.array(memberZodSchema)
 });
-
-
-export const updateTeamZodSchema = z.object({
-    teamId: z.string(),
-    members: z.array(memberZodSchema)
-});

@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { ProjectServices } from "./project.service";
+import { JwtPayload } from "jsonwebtoken";
 
 
 const createProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -36,8 +37,8 @@ const getProjectById = catchAsync(async (req: Request, res: Response, next: Next
 });
 
 const getProjects = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-
-    const result = await ProjectServices.getProjects();
+    const user = req.user;
+    const result = await ProjectServices.getProjects(user as JwtPayload);
 
     sendResponse(res, {
         statusCode: 200,

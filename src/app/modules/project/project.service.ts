@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errorHelpers/AppError";
 import { Team } from "../team/team.model";
 import { IProject } from "./project.interface";
@@ -22,8 +23,11 @@ const createProject = async (payload: Partial<IProject>) => {
     return result;
 };
 
-const getProjects = async () => {
-    const project = await Project.find();
+const getProjects = async (decodedUser: JwtPayload) => {
+
+    const project = await Project.find({ creator: decodedUser?.userId })
+        .populate("linkedTeam")
+        .sort({ createdAt: -1 });;
 
     return project;
 };

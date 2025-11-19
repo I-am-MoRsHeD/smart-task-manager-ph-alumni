@@ -31,23 +31,8 @@ const getTeams = async () => {
     return teams;
 };
 
-const updateTeam = async (payload: { teamId: string } & ITeam) => {
-
-    const existingTeam = await Team.findById(payload.teamId);
-    if (!existingTeam) {
-        throw new AppError(404, "Team does not exist");
-    };
-
-    return await Team.findByIdAndUpdate(payload.teamId, {
-        members: payload.members
-    }, {
-        new: true,
-        runValidators: true
-    });
-};
 
 export const TeamServices = {
     createTeam,
-    getTeams,
-    updateTeam
+    getTeams
 };

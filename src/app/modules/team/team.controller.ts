@@ -29,19 +29,8 @@ const getTeams = catchAsync(async (req: Request, res: Response, next: NextFuncti
     });
 });
 
-const updateTeam = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await TeamServices.updateTeam(req.body);
-
-    sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: "Member added successfully",
-        data: result
-    });
-});
 
 export const TeamController = {
     createTeam,
-    getTeams,
-    updateTeam
+    getTeams
 }

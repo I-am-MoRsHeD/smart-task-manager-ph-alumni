@@ -5,6 +5,7 @@ export interface IMember {
     name: string;
     role: string;
     capacity: number;
+    currentTask?: number;
 }
 
 export interface ITeam {
