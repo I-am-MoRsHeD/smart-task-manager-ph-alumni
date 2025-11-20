@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
 import { Task } from "./task.model";
 import { ITask } from "./task.interface";
@@ -5,6 +6,7 @@ import { Project } from "../project/project.model";
 import { JwtPayload } from "jsonwebtoken";
 import AppError from "../../errorHelpers/AppError";
 import { Team } from "../team/team.model";
+import { IMember, ITeam } from "../team/team.interface";
 
 
 const createTask = async (payload: ITask) => {
@@ -60,7 +62,6 @@ const createTask = async (payload: ITask) => {
     }
 };
 
-
 const updateTask = async (id: string, payload: Partial<ITask>, decodedUser: JwtPayload) => {
 
     const existingTask = await Task.findById(id);
@@ -86,26 +87,63 @@ const updateTask = async (id: string, payload: Partial<ITask>, decodedUser: JwtP
 };
 
 const deleteTask = async (id: string, decodedUser: JwtPayload) => {
-    const existingTask = await Task.findById(id);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (!existingTask) {
-        throw new AppError(404, "Task not found");
-    };
+    try {
+        const existingTask = await Task.findById(id).session(session);
 
-    const validProject = await Project.findById(existingTask.projectId);
+        if (!existingTask) {
+            throw new AppError(404, "Task not found");
+        }
 
-    if (!validProject) {
-        throw new AppError(404, "Project not found!");
-    };
+        const project = await Project.findById(existingTask.projectId)
+            .populate("linkedTeam")
+            .session(session);
 
-    if (validProject.creator.toString() !== decodedUser.userId) {
-        throw new AppError(403, "You are not authorized to do this")
-    };
+        if (!project) {
+            throw new AppError(404, "Project not found!");
+        }
 
-    await Task.findByIdAndDelete(id);
+        if (project.creator.toString() !== decodedUser.userId) {
+            throw new AppError(403, "You are not authorized to do this");
+        }
 
-    return null;
+        const assignedMemberNo = existingTask.assignedMember;
+        const linkedTeam: Partial<ITeam> = project.linkedTeam;
+
+        const members = linkedTeam?.members as IMember[] | undefined;
+
+        if (members && members.length > 0) {
+            const memberIndex = members.findIndex(
+                (m: IMember) => m.member_no === Number(assignedMemberNo)
+            );
+
+            if (memberIndex !== -1 && members[memberIndex]) {
+                members[memberIndex].currentTask =
+                    Math.max(0, (members[memberIndex].currentTask ?? 0) - 1);
+            }
+        }
+
+        project.tasks = project?.tasks?.filter(
+            (taskId: mongoose.Types.ObjectId) => taskId?.toString() !== id
+        );
+
+        await (linkedTeam as any).save({ session });
+        await project.save({ session });
+        await Task.findByIdAndDelete(id).session(session);
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return { success: true, message: "Task deleted successfully" };
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
 };
+
 
 export const TaskServices = {
     createTask,
