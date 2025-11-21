@@ -19,7 +19,8 @@ const createTeam = catchAsync(async (req: Request, res: Response, next: NextFunc
 });
 
 const getTeams = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await TeamServices.getTeams();
+    const user = req.user;
+    const result = await TeamServices.getTeams(user as JwtPayload);
 
     sendResponse(res, {
         statusCode: 200,

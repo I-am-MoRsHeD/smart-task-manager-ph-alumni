@@ -23,8 +23,8 @@ const createTeam = async (payload: Partial<ITeam>, decodedUser: JwtPayload): Pro
     return result;
 };
 
-const getTeams = async () => {
-    const teams = await Team.find()
+const getTeams = async (decodedUser: JwtPayload) => {
+    const teams = await Team.find({ createdBy: decodedUser?.userId })
         .populate("createdBy")
         .populate("members");
 
