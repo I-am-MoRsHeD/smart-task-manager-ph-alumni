@@ -3,7 +3,8 @@ import { authRoutes } from "../modules/auth/auth.route";
 import { teamRoutes } from "../modules/team/team.route";
 import { taskRoutes } from "../modules/task/task.route";
 import { projectRoutes } from "../modules/project/project.route";
-import { metaRoutes } from "../modules/stats/stats.route";
+import { statsRoutes } from "../modules/stats/stats.route";
+import { reassignmentRoutes } from "../modules/reassignment/reassignment.route";
 
 
 export const router = Router();
@@ -26,8 +27,12 @@ const moduleRoutes = [
         route: projectRoutes
     },
     {
-        path: '/metadata',
-        route: metaRoutes
+        path: '/stats',
+        route: statsRoutes
+    },
+    {
+        path: '/reassignment',
+        route: reassignmentRoutes
     },
 ];
 

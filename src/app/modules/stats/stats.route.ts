@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { MetaController } from "./stats.controller";
+import { StatsController } from "./stats.controller";
 import { checkAuth } from "../../utils/checkAuth";
 
 
@@ -7,6 +7,6 @@ const router = Router();
 
 router.get('/',
     checkAuth(),
-    MetaController.getDashboardData);
+    StatsController.getDashboardData);
 
-export const metaRoutes = router;
+export const statsRoutes = router;
